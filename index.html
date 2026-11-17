@@ -133,11 +133,23 @@ body.policeC .page.lettres { font-family: "TiqounSeferCLettres", serif; }
 .marge { font-family: system-ui, sans-serif; font-size: 0.4em; color: var(--gris); text-align: center; line-height: 1; align-self: center; }
 .page.lettres .marge { visibility: hidden; }
 /* numéros de versets en exposant, au début du verset ; numéro de chapitre en gras au verset 1 (essai du 17/11) */
-.nv { display: inline-block; font: 400 0.32em/0 system-ui, sans-serif; font-variant-numeric: lining-nums; color: var(--gris); vertical-align: 1.3em; margin: 0 -0.47em 0 0.28em; direction: ltr; unicode-bidi: isolate; }
+.nv { display: inline-block; font: 400 0.52em/0 "TiqounQere", serif; font-variant-numeric: lining-nums; color: var(--gris); vertical-align: 1.3em; margin: 0 -0.47em 0 0.28em; direction: ltr; unicode-bidi: isolate; }
 .nv.ch { font-weight: 700; font-size: 0.38em; vertical-align: 0.95em; margin: 0 -0.39em 0 0.2em; color: var(--encre); }
 /* numéro de chapitre dans un carré (auteur, 17/11, 7 h 55) */
 .nv.ch > b { display: inline-block; font-weight: 700; line-height: 1; text-indent: 0; border: 0.09em solid currentColor; border-radius: 0.12em; padding: 0.06em 0.16em 0.04em; min-width: 1em; text-align: center; box-sizing: border-box; }
 .page.lettres .nv { visibility: hidden; }
+/* numéros en lettres hébraïques (17/11, 14 h 34) : caractère de livre (police du qeré), un peu plus grands que les anciens chiffres */
+.nv { vertical-align: 0.95em; margin: 0 -0.26em 0 0.3em; color: var(--gris); }
+.nv.ch { font: 700 0.45em/0 "TiqounQere", serif; vertical-align: 0.8em; margin: 0 -0.3em 0 0.2em; }
+.nv.ch > b { font-weight: 700; padding: 0.02em 0.16em 0.1em; }
+.nv.tete { text-indent: 0.42em; }
+/* repère de montée : filet fin entre deux lignes, nom en toutes lettres à droite, petit triangle au-dessus du mot de début */
+.bandeM { height: 1em; position: relative; direction: rtl; }
+.bandeM.vide { visibility: hidden; }
+.bandeM i { position: absolute; right: 0; bottom: 0.12em; font: 400 0.62em/1 "TiqounQere", serif; font-style: normal; color: var(--montee, #3d5a73); background: var(--fond, #fff); padding: 0 0.35em 0 0.5em; z-index: 1; white-space: nowrap; }
+.bandeM::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0.36em; border-top: 0.02em solid var(--montee, #3d5a73); opacity: 0.55; }
+.bandeM u { position: absolute; bottom: 0.02em; width: 0; height: 0; border: 0.13em solid transparent; border-top: 0.2em solid var(--montee, #3d5a73); transform: translateX(50%); }
+.ligne.hors + .bandeM, .bandeM:has(+ .ligne.hors) { display: none; }
 /* variante à l'essai (17/11, 13 h) : le numéro du verset où commence la montée, en couleur de montée, au lieu du petit point */
 body.mtnum .page .dm { display: none; }
 body.mtnum .nv.mt { color: var(--montee, #3d5a73); font-weight: 700; }
@@ -326,7 +338,9 @@ function construire(cible, lettres) {
     ligne.append(gout, corps, marge);
     corps._l = l;
     remplir(corps, l, lettres);
-    if (!lettres && dmDe(l)) dmDe(l).forEach(d => { const e = el("span", "dmM"); e.appendChild(elt("b", null, d[2])); gout.appendChild(e); });
+    const dms = dmDe(l);
+    if (dms && dms.length) {   // repère de montée (décision de l'auteur, 17/11, 14 h 34) : nom en toutes lettres sur un filet entre deux lignes, dans les deux vues (même hauteur), visible dans la seule vue ponctuée
+      const B = el("div", "bandeM" + (lettres ? " vide" : "")); B.appendChild(elt("i", null, dms.map(d => NOMS_M[d[2]] || d[2]).join(" · "))); B._dms = dms; B._ligne = ligne; cible.appendChild(B); }
     if ((lecture === "semaine" || (speciale() && speciale().seg)) && !corps._vis) ligne.classList.add("hors");
     if (l._tr) { const k0 = Object.values(l._tr).find(t => t[1] === 0); if (k0) marge.addEventListener("click", (e) => { e.stopPropagation(); if (tradOn) ouvrirBandeau(k0[0], -1); }); }
     cible.appendChild(ligne);
@@ -347,16 +361,15 @@ function remplir(corps, l, lettres) {
       mc.forEach((s, j) => {
         const [w, v0] = jeton(s); const nh = l._nh && l._nh[mi + "," + j]; const dedans = dansLecture(l, mi, j), v = dedans ? (nh || v0) : null;
         if (dedans) corps._vis++; else w.classList.add("hors");
-        if (!lettres && dmDe(l)) dmDe(l).forEach(d => { if (d[0] === mi && d[1] === j) { w.classList.add("adm");
-          if (mi || j) w.appendChild(el("span", "dm")); else w.classList.remove("adm"); } });
+        if (!lettres && dmDe(l)) dmDe(l).forEach(d => { if (d[0] === mi && d[1] === j) { w.classList.add("adm"); } });
         if (v) versets.push(v);
         if (!lettres && l._tr && l._tr[mi + "," + j]) { w.classList.add("tr"); w._t = l._tr[mi + "," + j]; }
         if (lie && groupe) { groupe.appendChild(w); }
         else {
           if (multi && j) cible.appendChild(document.createTextNode(" "));
           groupe = el("span");
-          if (v) { const ch = l._ch && l._ch[mi + "," + j]; const n = elt("span", ch ? "nv ch" : "nv", ch ? "" : v); if (ch) n.appendChild(elt("b", null, ch));
-            if (!mi && !j) n.classList.add(dmDe(l) && dmDe(l).length ? "cote" : "tete");
+          if (v) { const ch = l._ch && l._ch[mi + "," + j]; const n = elt("span", ch ? "nv ch" : "nv", ch ? "" : hebN(+v)); if (ch) n.appendChild(elt("b", null, hebN(ch)));
+            if (!mi && !j) n.classList.add("tete");
             if ((mi || j) && w.classList.contains("adm")) n.classList.add("mt");   // numéro du verset où une montée commence en cours de ligne   // un cercle de montée occupe la gouttière de cette ligne
             if (l._tr && l._tr[mi + "," + j]) { const t = l._tr[mi + "," + j]; n.addEventListener("click", (e) => { e.stopPropagation(); if (tradOn) ouvrirBandeau(t[0], -1); }); }
             groupe.appendChild(n); }
@@ -412,8 +425,20 @@ function ajuster() {
     c.insertBefore(r, c.firstChild); const y = r.getBoundingClientRect().top; r.remove(); return y; };
   pageL.style.transform = `translateY(${base(pageP) - base(pageL)}px)`;
   etirerLignes();
-  placerCoupes(); placerPasseq(); placerPoints();
+  placerCoupes(); placerPasseq(); placerFilets();
 }
+// triangle de la bande de montée : au-dessus du début du mot où la montée commence (côté droit, écriture de droite à gauche)
+function placerFilets() {
+  page.querySelectorAll(".page.ponctue .bandeM").forEach(B => {
+    B.querySelectorAll("u").forEach(u => u.remove());
+    const rb = B.getBoundingClientRect(); if (!rb.width) return;
+    B._ligne.querySelectorAll(".adm").forEach(w => { const r = w.getBoundingClientRect(); if (!r.width) return;
+      const u = document.createElement("u"); u.style.right = (rb.right - r.right) + "px"; B.appendChild(u); }); });
+}
+const NOMS_M = { "1": "כהן", "2": "לוי", "3": "ישראל", "4": "רביעי", "5": "חמישי", "6": "שישי", "7": "שביעי", "8": "שמיני", "M": "מפטיר" };
+// numéros de chapitres et de versets en lettres hébraïques (décision de l'auteur, 17/11, 14 h 34) ; 15 = טו, 16 = טז
+function hebN(n) { const C = [[400,"ת"],[300,"ש"],[200,"ר"],[100,"ק"],[90,"צ"],[80,"פ"],[70,"ע"],[60,"ס"],[50,"נ"],[40,"מ"],[30,"ל"],[20,"כ"],[10,"י"],[9,"ט"],[8,"ח"],[7,"ז"],[6,"ו"],[5,"ה"],[4,"ד"],[3,"ג"],[2,"ב"],[1,"א"]];
+  let s = ""; for (const [v, l] of C) { if (n === 15) { s += "טו"; n = 0; } if (n === 16) { s += "טז"; n = 0; } while (n >= v) { s += l; n -= v; } } return s; }
 // chaque passeq est centré dans le blanc qui précède son mot (mesuré sur la ligne telle qu'elle est justifiée)
 // petit point de montée (début en cours de ligne, 17/11, 13 h) : au milieu du blanc qui précède le mot, à mi-hauteur, à l'écart du
 // numéro de verset (en exposant dans ce même blanc) ; il touchait la première lettre quand il était collé au mot.
@@ -460,7 +485,7 @@ function placerCoupes() {
 
 function aller(n) { col = Math.max(0, Math.min(D.cols.length - 1, n)); rendre(); window.scrollTo(0, 0); }
 function basculer() { lettresSeules = !lettresSeules; fermerBulle();
-  document.getElementById("bascule").textContent = lettresSeules ? "Texte ponctué" : "Lettres seules"; montrer(); placerPasseq(); placerPoints(); }
+  document.getElementById("bascule").textContent = lettresSeules ? "Texte ponctué" : "Lettres seules"; montrer(); placerPasseq(); placerFilets(); }
 
 const MONTEES = [[[0,0,0,0],[1,20,0,0],[2,4,0,5],[3,9,0,0],[4,0,0,4],[4,5,0,4],[5,4,1,0],[5,25,0,0]],[[5,31,0,0],[6,12,0,7],[6,39,0,4],[7,33,1,0],[8,15,1,0],[8,33,0,0],[10,0,0,0],[11,1,0,1]],[[11,9,0,0],[11,31,0,1],[12,5,0,4],[12,29,0,0],[13,22,0,5],[13,39,0,3],[15,11,0,3],[16,1,0,3]],[[16,7,0,0],[16,29,0,5],[17,20,0,6],[18,17,0,4],[20,1,0,3],[20,29,0,0],[21,7,0,0],[22,2,0,0]],[[22,10,0,0],[22,35,0,7],[23,18,0,1],[24,2,0,7],[25,5,0,2],[25,28,0,0],[26,2,0,0],[26,7,0,0]],[[26,13,0,0],[27,5,0,2],[27,17,0,6],[27,33,0,4],[28,3,0,5],[29,8,0,8],[30,8,0,5],[30,13,0,4]],[[30,17,1,0],[30,41,0,1],[31,25,0,2],[32,25,0,6],[33,6,0,1],[34,18,0,2],[35,20,0,1],[35,38,0,5]],[[36,1,0,0],[36,19,0,1],[37,3,0,4],[37,17,0,7],[37,40,1,0],[39,27,0,1],[40,40,1,0],[41,22,0,2]],[[41,28,0,0],[42,6,0,0],[42,23,0,3],[43,5,0,0],[44,10,1,0],[44,22,0,5],[45,10,0,0],[46,1,0,1]],[[46,8,0,0],[46,31,0,6],[47,29,0,6],[48,12,0,3],[49,7,0,2],[50,30,0,1],[51,13,0,7],[52,1,0,7]],[[52,10,1,0],[52,29,0,5],[53,6,0,2],[53,25,0,0],[53,40,0,5],[54,38,1,0],[55,26,0,5],[56,15,0,4]],[[56,20,0,6],[57,3,0,4],[57,17,0,6],[57,31,0,0],[58,14,1,0],[58,26,0,0],[59,32,0,3],[59,35,0,2]],[[60,5,0,0],[60,27,0,7],[61,10,0,4],[61,35,1,0],[62,25,0,7],[63,29,0,0],[64,11,0,6],[65,5,0,0]],[[65,10,1,0],[65,33,1,0],[66,14,1,0],[66,30,0,0],[67,40,0,0],[68,22,0,3],[69,28,0,5],[70,16,0,5]],[[70,22,0,0],[71,4,1,0],[71,29,0,1],[72,3,1,0],[73,17,0,0],[73,33,1,0],[74,31,0,0],[75,10,0,0]],[[75,17,1,0],[76,1,0,1],[76,15,0,0],[76,36,0,0],[78,6,1,0],[78,31,0,0],[79,34,0,0],[80,18,0,0]],[[80,23,0,0],[81,2,0,2],[81,24,0,4],[81,31,0,0],[81,41,0,6],[82,23,0,4],[83,18,0,0],[83,25,1,0]],[[83,35,0,0],[84,18,1,0],[85,11,1,0],[86,6,1,0],[86,18,1,0],[86,40,0,0],[87,8,1,0],[88,4,0,0]],[[88,10,0,0],[88,28,0,7],[89,24,1,0],[90,11,0,0],[90,36,1,0],[91,7,1,0],[91,20,1,0],[91,33,0,5]],[[91,38,1,0],[92,24,1,0],[93,13,1,0],[93,36,1,0],[94,22,0,7],[95,17,1,0],[95,32,0,0],[96,1,0,4]],[[96,8,0,0],[97,36,1,0],[100,2,0,0],[100,12,0,0],[100,22,0,0],[100,38,0,2],[101,26,0,0],[101,37,0,9]],[[102,1,1,0],[102,28,0,6],[103,6,0,0],[103,32,1,0],[104,13,1,0],[105,29,0,0],[106,10,1,0],[106,38,0,6]],[[107,2,1,0],[107,30,0,0],[108,23,0,0],[109,0,0,0],[109,18,0,0],[109,39,1,0],[110,17,1,0],[110,28,0,0]],[[110,39,0,0],[111,21,0,0],[111,40,1,0],[112,16,0,0],[113,6,0,0],[114,13,0,0],[115,10,1,0],[115,38,0,2]],[[116,2,0,0],[116,23,0,0],[117,15,0,0],[118,21,0,0],[118,41,0,5],[119,14,0,5],[119,31,0,5],[119,38,0,5]],[[120,3,1,0],[120,30,0,3],[121,0,0,0],[121,24,0,0],[121,34,0,3],[122,3,0,0],[123,8,0,6],[123,29,0,1]],[[123,35,0,0],[124,19,0,2],[124,40,0,0],[125,7,1,0],[125,19,0,0],[125,39,1,0],[126,24,0,4],[126,29,0,9]],[[126,37,0,0],[127,17,0,4],[127,33,1,0],[128,15,0,0],[129,9,0,3],[129,36,1,0],[130,18,0,4],[130,22,0,5]],[[130,28,0,0],[131,21,0,5],[131,36,0,5],[132,15,0,0],[132,29,0,2],[133,14,1,0],[133,40,0,1],[134,7,0,4]],[[134,14,0,0],[134,33,0,1],[135,6,0,0],[135,19,1,0],[135,28,0,0],[135,41,0,5],[136,27,0,2],[136,32,0,0]],[[136,39,0,0],[137,20,1,0],[138,21,0,0],[139,6,0,0],[140,8,0,0],[140,25,0,0],[141,7,0,0],[141,38,0,4]],[[142,2,0,0],[142,25,0,7],[142,34,0,2],[143,1,1,0],[143,8,1,0],[143,27,1,0],[143,41,1,0],[144,11,0,1]],[[144,17,0,0],[144,21,0,3],[144,27,0,5],[146,8,0,0],[146,33,0,4],[147,1,0,4],[147,13,0,7],[147,17,0,2]],[[147,26,0,0],[148,5,1,0],[149,33,0,0],[151,0,0,0],[151,22,0,0],[152,19,1,0],[153,0,0,0],[153,31,0,0]],[[153,37,0,0],[154,27,1,0],[155,6,0,0],[155,23,0,0],[157,26,1,0],[159,12,0,0],[160,17,0,0],[161,2,0,6]],[[161,12,0,0],[161,34,0,3],[162,17,0,0],[163,2,1,0],[163,37,0,0],[164,26,1,0],[166,4,0,0],[166,36,0,0]],[[167,0,0,0],[167,23,0,2],[168,18,0,3],[169,10,0,0],[170,12,0,4],[170,26,0,0],[171,1,1,0],[171,20,0,0]],[[171,30,0,0],[172,11,0,0],[172,23,1,0],[173,25,1,0],[173,37,0,0],[174,12,0,0],[175,20,1,0],[175,39,0,4]],[[176,4,0,0],[176,36,0,0],[177,17,0,0],[177,31,1,0],[178,5,0,0],[178,37,0,3],[179,10,0,0],[179,31,0,1]],[[179,37,1,0],[180,17,0,6],[180,32,0,0],[181,26,0,7],[182,8,0,0],[182,29,0,1],[183,14,0,6],[183,41,0,2]],[[184,5,0,0],[184,26,0,4],[186,17,0,0],[187,11,0,0],[188,0,0,0],[188,25,1,0],[189,26,1,0],[190,23,1,0]],[[190,33,0,0],[191,22,0,0],[191,41,1,0],[192,19,1,0],[193,3,0,5],[193,25,0,0],[194,18,0,0],[195,7,0,3]],[[195,13,0,0],[195,29,0,0],[196,20,1,0],[197,18,0,0],[197,32,0,0],[198,7,0,0],[199,7,0,0],[199,28,0,7]],[[199,38,0,0],[200,15,0,5],[200,36,0,7],[201,24,0,3],[201,40,1,0],[203,9,1,0],[204,7,0,4],[204,16,0,4]],[[204,24,1,0],[205,5,0,0],[207,2,0,0],[207,18,0,0],[208,12,1,0],[209,5,0,0],[209,40,1,0],[210,16,0,2]],[[210,22,0,0],[211,31,0,7],[212,16,0,1],[213,32,0,0],[214,13,0,0],[215,9,1,0],[215,33,1,0],[215,33,1,0]],[[216,1,1,0],[216,37,0,3],[217,34,1,0],[219,3,1,0],[219,32,0,0],[220,8,1,0],[221,4,0,0],[221,39,0,0]],[[222,7,1,0],[223,3,1,0],[223,20,1,0],[223,29,1,0],[223,41,0,0],[225,2,1,0],[225,35,1,0],[226,26,0,5]],[[226,31,1,0],[227,12,1,0],[227,32,1,0],[229,4,1,0],[229,33,1,0],[230,5,1,0],[230,23,1,0],[231,28,0,0]],[[231,34,0,0],[232,13,1,0],[232,25,1,0],[232,35,0,0],[233,12,1,0],[234,3,0,1],[237,0,0,0],[237,9,0,1]],[[237,15,0,0],[237,20,0,2],[237,26,0,0],[238,15,1,0],[238,28,0,1],[238,37,1,0],[239,1,1,0],[239,1,1,0]],[[239,18,0,0],[239,24,0,2],[239,29,1,0],[239,37,0,4],[240,7,0,0],[240,22,0,4],[240,34,0,7],[240,40,0,2]],[[241,7,0,0],[241,16,0,0],[241,26,0,0],[241,36,1,0],[242,10,1,0],[242,28,0,0],[242,36,0,0],[243,2,0,0]],[[243,14,0,0],[243,25,0,0],[243,34,1,0],[244,0,1,0],[244,7,1,0],[244,13,0,6],[244,19,1,0]]];
 MONTEES.forEach(m => m.forEach(([c, l, mi, j], i) => { const L = D.cols[c][l]; (L._dmS = L._dmS || []).push([mi, j, i < 7 ? String(i + 1) : "M"]); }));
