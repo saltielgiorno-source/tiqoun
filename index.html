@@ -187,6 +187,10 @@ body.mtnum .nv.mt { color: var(--montee, #3d5a73); font-weight: 700; }
 #sonBarre[hidden] { display: none; }
 #sonBarre button { font-size: 18px; width: 36px; height: 36px; border-radius: 50%; border: 0; background: #c9a227; color: #1d2a44; }
 #sonBarre select { max-width: 60vw; font-size: 13px; }
+/* barre réduite au seul bouton, en bas à droite, après le choix du lecteur (demande de l'auteur, 17/11, 21 h 21 : elle masquait le bouton plein écran) */
+#sonBarre:not(.reduite) { bottom: 56px; }   /* ouverte : au-dessus des boutons du bas */
+#sonBarre.reduite { left: auto; right: 10px; transform: none; padding: 4px; gap: 0; }
+#sonBarre.reduite select, #sonBarre.reduite #sonTemps { display: none; }
 .sonmot { background: rgba(201, 162, 39, .28); border-radius: 3px; }
 label.fichier { display: inline-block; padding: 4px 10px; border: 1px solid currentColor; border-radius: 6px; cursor: pointer; }
 label.fichier input { display: none; }
@@ -223,6 +227,7 @@ label.fichier input { display: none; }
     <p class="note">Division des montées et choix des passages : ceux de la bibliothèque hebcal, provisoires, en attendant le relevé du <i>Tiqoun qor’im</i> Ish Matsliaḥ.</p></section>
   <section><h3>Lecteur et voix</h3>
     <p class="note">Essai (17/11) : Bereshit seulement, 19 lecteurs de 14 traditions, choisis dans la barre du bas (▶). Le mot lu est surligné. Calages écoutés par l'auteur (17/11 : 239 mots justes sur 240 sondés).</p>
+    <p><button type="button" id="sonChanger">Changer de lecteur</button> <span class="note">(ou appui long sur ▶)</span></p>
     <label><input type="checkbox" id="sonToucher" checked> Toucher un mot lance la lecture à ce mot (à la place de la traduction)</label></section>
   <section><h3>Calendrier (bouton « Aujourd'hui »)</h3>
     <label><input type="radio" name="lieu" value="0" checked> Diaspora</label>
@@ -643,7 +648,15 @@ function sonCharger(k) { if (k === sonK) return; sonK = k; sonMots = SON[k].m; s
   sonA.src = "son/" + k + ".webm"; sonCour = -1; sonEffacer(); }
 function sonAller(k, t) { sonCharger(k); const go = () => { sonA.currentTime = t; sonA.play().catch(() => annoncer("Lecture impossible : vérifiez la connexion.")); };
   if (sonA.readyState >= 1) go(); else sonA.addEventListener("loadedmetadata", go, { once: true }); }
-sonSel.addEventListener("change", () => { sonA.pause(); sonLec = sonSel.value; sonK = null; sonEffacer(); try { localStorage.setItem("tiqoun-lecteur", sonLec); } catch (e) {} });
+const sonBarre = document.getElementById("sonBarre");
+function sonReduire(v) { sonBarre.classList.toggle("reduite", v); }
+try { if (localStorage.getItem("tiqoun-lecteur")) sonReduire(true); } catch (e) {}
+sonSel.addEventListener("change", () => { sonA.pause(); sonLec = sonSel.value; sonK = null; sonEffacer(); sonReduire(true); try { localStorage.setItem("tiqoun-lecteur", sonLec); } catch (e) {} });
+document.getElementById("sonChanger").addEventListener("click", () => { document.getElementById("reglages").hidden = true; sonReduire(false); sonSel.focus(); });
+{ let tAppui = null, long = false;   // appui long sur ▶ : rouvre le choix du lecteur
+  sonBt.addEventListener("pointerdown", () => { long = false; tAppui = setTimeout(() => { long = true; sonReduire(false); }, 550); });
+  ["pointerup", "pointerleave", "pointercancel"].forEach(ev => sonBt.addEventListener(ev, () => clearTimeout(tAppui)));
+  sonBt.addEventListener("click", (e) => { if (long) { e.stopImmediatePropagation(); long = false; } }, true); }
 // ▶ : reprend, ou part du premier mot lu par ce lecteur dans la colonne affichée (sinon du début de sa première montée)
 sonBt.addEventListener("click", () => { if (!sonA.paused) { sonA.pause(); return; }
   if (sonK && sonA.currentTime > 0 && sonMots.some(m => m[0] === col)) { sonA.play(); return; }
