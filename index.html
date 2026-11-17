@@ -208,7 +208,7 @@ label.fichier input { display: none; }
   </div>
   <div class="rang">
     <button id="bascule" type="button">Lettres seules</button>
-    <button id="ouvrirReg" type="button" aria-haspopup="dialog" aria-label="Réglages" title="Réglages"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg></button>
+    <button id="ouvrirReg" type="button" aria-haspopup="dialog" aria-label="Réglages" title="Réglages"><svg viewBox="0 0 24 24"><path d="M19.06 10.57 L21.52 10.76 L21.52 13.24 L19.06 13.43 L18.00 15.98 L19.61 17.85 L17.85 19.61 L15.98 18.00 L13.43 19.06 L13.24 21.52 L10.76 21.52 L10.57 19.06 L8.02 18.00 L6.15 19.61 L4.39 17.85 L6.00 15.98 L4.94 13.43 L2.48 13.24 L2.48 10.76 L4.94 10.57 L6.00 8.02 L4.39 6.15 L6.15 4.39 L8.02 6.00 L10.57 4.94 L10.76 2.48 L13.24 2.48 L13.43 4.94 L15.98 6.00 L17.85 4.39 L19.61 6.15 L18.00 8.02 Z M15 12 A3 3 0 1 0 9 12 A3 3 0 1 0 15 12 Z" style="fill:currentColor;fill-rule:evenodd;stroke:none"/></svg></button>
   </div>
 </header>
 <div id="bulle"><span></span><button type="button" aria-label="Voir le verset entier">⋯</button></div>
@@ -228,7 +228,7 @@ label.fichier input { display: none; }
   <section><h3>Lecteur et voix</h3>
     <p class="note">Essai (17/11) : Bereshit seulement, 19 lecteurs de 14 traditions, choisis dans la barre du bas (▶). Le mot lu est surligné. Calages écoutés par l'auteur (17/11 : 239 mots justes sur 240 sondés).</p>
     <p><button type="button" id="sonChanger">Changer de lecteur</button> <span class="note">(ou appui long sur ▶)</span></p>
-    <label><input type="checkbox" id="sonToucher" checked> Toucher un mot lance la lecture à ce mot (à la place de la traduction)</label></section>
+</section>
   <section><h3>Calendrier (bouton « Aujourd'hui »)</h3>
     <label><input type="radio" name="lieu" value="0" checked> Diaspora</label>
     <label><input type="radio" name="lieu" value="1"> Israël</label></section>
@@ -624,7 +624,7 @@ function ouvrirBandeau(k, r) { const v = TRAD.v[k], B = document.getElementById(
   B.querySelector(".cour").textContent = v.courant; const i = CLES_T.indexOf(k);
   document.getElementById("btPrec").disabled = i <= 0; document.getElementById("btSuiv").disabled = i >= CLES_T.length - 1;
   document.body.classList.add("bt"); }
-page.addEventListener("click", (e) => { if (sonClic(e)) return; const w = e.target.closest(".tr"), meme = w && w === motT; fermerBulle(); if (tradOn && w && !meme && !lettresSeules) ouvrirBulle(w); });
+page.addEventListener("click", (e) => { const w = e.target.closest(".tr"), meme = w && w === motT; fermerBulle(); if (tradOn && w && !meme && !lettresSeules) ouvrirBulle(w); });
 // ---- son (17/11) : Bereshit, 19 lecteurs (yéménite ajouté le soir). Demandes de l'auteur (17 h 27, 17 h 28) ; démo de la discussion du calage (18 h 35) ;
 // règle sur les lectures de tiers levée par l'auteur à 17 h 45 (sons dans son/, à côté de la page).
 // SON[clé] = { m: [[col, ligne, bloc, mot, début, fin], …], fin: arrêt (s), faible: score de calage faible }.
@@ -678,13 +678,7 @@ function sonSuivre() {
         sonEls = sonEl(m); sonEls.forEach(x => x.classList.add("sonmot"));
         const vis = sonEls.find(x => x.getBoundingClientRect().width); if (vis) { const r = vis.getBoundingClientRect(); if (r.top < 60 || r.bottom > innerHeight - 70) vis.scrollIntoView({ block: "center", behavior: "smooth" }); } } } }
   if (!sonA.paused) requestAnimationFrame(sonSuivre); }
-// toucher un mot : la lecture du lecteur choisi part de ce mot
-function sonClic(e) { if (!document.getElementById("sonToucher").checked) return false;
-  const corps = e.target.closest(".corps"); if (!corps) return false; let w = e.target; while (w && w.parentElement && !w._k) w = w.parentElement; if (!w || !w._k) return false;
-  const cle = col + "," + corps._li + "," + w._k;
-  const k = LECTEURS[sonLec].find(x => SON[x].m.some(m => m.slice(0, 4).join(",") === cle));
-  if (!k) { if (Object.values(SON).some(v => v.m.some(m => m.slice(0, 4).join(",") === cle))) { annoncer("Ce lecteur n'a pas lu ce passage ; choisissez-en un autre dans la barre du bas."); e.stopPropagation(); return true; } return false; }
-  e.stopPropagation(); fermerBulle(); sonCharger(k); sonAller(k, SON[k].m[sonIdx[cle]][4]); return true; }
+// (17/11, 21 h 24) le toucher d'un mot ne lance plus la lecture : il garde la traduction (décision de l'auteur).
 bulle.lastElementChild.addEventListener("click", () => { if (motT) ouvrirBandeau(motT._t[0], motT._r); });
 document.getElementById("btFerme").addEventListener("click", () => document.body.classList.remove("bt"));
 document.getElementById("btPrec").addEventListener("click", () => { fermerBulle(); ouvrirBandeau(CLES_T[CLES_T.indexOf(bandeauK) - 1], -1); });
