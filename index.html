@@ -191,6 +191,8 @@ body.mtnum .nv.mt { color: var(--montee, #3d5a73); font-weight: 700; }
 #sonBarre:not(.reduite) { bottom: 56px; }   /* ouverte : au-dessus des boutons du bas */
 #sonBarre.reduite { left: auto; right: 10px; transform: none; padding: 4px; gap: 0; }
 #sonBarre.reduite select, #sonBarre.reduite #sonTemps { display: none; }
+#sonBarre #sonOuvrir { width: 26px; height: 36px; border-radius: 13px; background: transparent; color: #fff; font-size: 16px; }
+#sonBarre:not(.reduite) #sonOuvrir { display: none; }
 .sonmot { background: rgba(201, 162, 39, .28); border-radius: 3px; }
 label.fichier { display: inline-block; padding: 4px 10px; border: 1px solid currentColor; border-radius: 6px; cursor: pointer; }
 label.fichier input { display: none; }
@@ -227,7 +229,7 @@ label.fichier input { display: none; }
     <p class="note">Division des montées et choix des passages : ceux de la bibliothèque hebcal, provisoires, en attendant le relevé du <i>Tiqoun qor’im</i> Ish Matsliaḥ.</p></section>
   <section><h3>Lecteur et voix</h3>
     <p class="note">Essai (17/11) : Bereshit seulement, 19 lecteurs de 14 traditions, choisis dans la barre du bas (▶). Le mot lu est surligné. Calages écoutés par l'auteur (17/11 : 239 mots justes sur 240 sondés).</p>
-    <p><button type="button" id="sonChanger">Changer de lecteur</button> <span class="note">(ou appui long sur ▶)</span></p>
+    <p><button type="button" id="sonChanger">Changer de lecteur</button> <span class="note">(ou ▾ à côté de ▶)</span></p>
 </section>
   <section><h3>Calendrier (bouton « Aujourd'hui »)</h3>
     <label><input type="radio" name="lieu" value="0" checked> Diaspora</label>
@@ -246,7 +248,7 @@ label.fichier input { display: none; }
   <section><h3>Aides à la lecture</h3><p class="note">À venir.</p></section>
   <button type="button" class="ferme" aria-label="Fermer">✕</button></div></div>
 <div id="annonce" role="status" hidden></div>
-<div id="sonBarre"><button id="sonJouer" type="button" aria-label="Lire ou arrêter">▶</button><select id="sonChoix" aria-label="Enregistrement"></select><span id="sonTemps"></span><audio id="sonAudio" preload="auto"></audio></div>
+<div id="sonBarre"><button id="sonJouer" type="button" aria-label="Lire ou arrêter">▶</button><button id="sonOuvrir" type="button" aria-label="Choisir le lecteur" title="Choisir le lecteur">▾</button><select id="sonChoix" aria-label="Enregistrement"></select><span id="sonTemps"></span><audio id="sonAudio" preload="auto"></audio></div>
 <div id="flott">
   <button id="eclipse" type="button" aria-label="Masquer ou montrer le bandeau" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
   <button id="plein" type="button" aria-label="Plein écran" hidden><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
@@ -602,9 +604,14 @@ document.getElementById("prec").addEventListener("click", () => pas(-1));
 document.getElementById("suiv").addEventListener("click", () => pas(1));
 document.getElementById("bascule").addEventListener("click", basculer);
 // traduction au toucher : bulle du mot, bandeau du verset
-const TRAD = {"v":{"1:1:1":{"mots":["Au commencement","créa","Dieu","","les cieux","","et la terre."],"courant":"Au commencement, Dieu créa le ciel et la terre.","lie":{"3":4,"5":6},"ref":"Bereshit 1,1"},"1:1:2":{"mots":["Et la terre","était","informe","et vide,","et l'obscurité","sur","la face de","l'abîme,","et le souffle de","Dieu","planait","sur","la face des","eaux."],"courant":"Or la terre n’était que solitude et chaos ; des ténèbres couvraient la face de l’abîme, et le souffle de Dieu planait à la surface des eaux.","ref":"Bereshit 1,2"},"1:1:3":{"mots":["Et dit","Dieu :","« Que soit","une lumière ! »","Et fut","une lumière."],"courant":"Dieu dit : \"Que la lumière soit !\" Et la lumière fut.","ref":"Bereshit 1,3"},"1:1:4":{"mots":["Et vit","Dieu","","la lumière,","qu'elle était","bonne ;","et sépara","Dieu","entre","la lumière","et entre","l'obscurité."],"courant":"Dieu considéra que la lumière était bonne, et il établit une distinction entre la lumière et les ténèbres.","lie":{"2":3},"ref":"Bereshit 1,4"},"1:1:5":{"mots":["Et appela","Dieu","la lumière","« jour »,","et l'obscurité,","il l'appela","« nuit ».","Et fut","un soir,","et fut","un matin :","jour","un."],"courant":"Dieu appela la lumière jour, et les ténèbres, il les appela Nuit. Il fut soir, il fut matin, un jour.","ref":"Bereshit 1,5"}},"p":[[0,0,0,0,"1:1:1",0],[0,0,0,1,"1:1:1",1],[0,0,0,2,"1:1:1",2],[0,0,0,3,"1:1:1",3],[0,0,0,4,"1:1:1",4],[0,0,0,5,"1:1:1",5],[0,0,0,6,"1:1:1",6],[0,1,0,0,"1:1:2",0],[0,1,0,1,"1:1:2",1],[0,1,0,2,"1:1:2",2],[0,1,0,3,"1:1:2",3],[0,1,0,4,"1:1:2",4],[0,1,0,5,"1:1:2",5],[0,1,0,6,"1:1:2",6],[0,1,0,7,"1:1:2",7],[0,1,0,8,"1:1:2",8],[0,2,0,0,"1:1:2",9],[0,2,0,1,"1:1:2",10],[0,2,0,2,"1:1:2",11],[0,2,0,3,"1:1:2",12],[0,2,0,4,"1:1:2",13],[0,2,0,5,"1:1:3",0],[0,2,0,6,"1:1:3",1],[0,2,0,7,"1:1:3",2],[0,3,0,0,"1:1:3",3],[0,3,0,1,"1:1:3",4],[0,3,0,2,"1:1:3",5],[0,3,0,3,"1:1:4",0],[0,3,0,4,"1:1:4",1],[0,3,0,5,"1:1:4",2],[0,3,0,6,"1:1:4",3],[0,3,0,7,"1:1:4",4],[0,3,0,8,"1:1:4",5],[0,4,0,0,"1:1:4",6],[0,4,0,1,"1:1:4",7],[0,4,0,2,"1:1:4",8],[0,4,0,3,"1:1:4",9],[0,4,0,4,"1:1:4",10],[0,4,0,5,"1:1:4",11],[0,4,0,6,"1:1:5",0],[0,5,0,0,"1:1:5",1],[0,5,0,1,"1:1:5",2],[0,5,0,2,"1:1:5",3],[0,5,0,3,"1:1:5",4],[0,5,0,4,"1:1:5",5],[0,5,0,5,"1:1:5",6],[0,5,0,6,"1:1:5",7],[0,5,0,7,"1:1:5",8],[0,6,0,0,"1:1:5",9],[0,6,0,1,"1:1:5",10],[0,6,0,2,"1:1:5",11],[0,6,0,3,"1:1:5",12]]};
-TRAD.p.forEach(([c, l, mi, j, k, r]) => { const L = D.cols[c][l]; (L._tr = L._tr || {})[mi + "," + j] = [k, r]; });
-const CLES_T = Object.keys(TRAD.v), bulle = document.getElementById("bulle");
+const TRAD = {"v":{},"p":[]};
+const CLES_T = [], bulle = document.getElementById("bulle");
+function tradAjouter(T) { Object.assign(TRAD.v, T.v); CLES_T.push(...Object.keys(T.v));
+  T.p.forEach(([c, l, mi, j, k, r]) => { const L = D.cols[c][l]; (L._tr = L._tr || {})[mi + "," + j] = [k, r]; }); }
+tradAjouter({ v: {}, p: TRAD.p });
+// 18/11 : traduction de toute la Torah, un fichier par livre à côté de la page (trad/trad_1.json … trad_5.json), chargés dans l'ordre
+(async () => { let n = 0; for (let i = 1; i <= 5; i++) { try { const r = await fetch("trad/trad_" + i + ".json"); if (r.ok) { tradAjouter(await r.json()); n++; } } catch (e) {} }
+  if (n) { const y = scrollY; rendre(); scrollTo(0, y); } })();
 let tradOn = true, motT = null, bandeauK = null;
 try { tradOn = localStorage.getItem("tiqoun-trad") !== "0"; } catch (e) {}
 function fermerBulle() { bulle.classList.remove("vu"); document.querySelectorAll(".trsel").forEach(e => e.classList.remove("trsel")); motT = null; }
@@ -612,7 +619,8 @@ function ouvrirBulle(w) { const k = w._t[0], v = TRAD.v[k]; let r = w._t[1]; mot
   if (v.lie && v.lie[r] !== undefined) r = v.lie[r];          // את et les mots de même nature : reliés au mot qu'ils désignent
   const groupe = [r].concat(Object.keys(v.lie || {}).filter(a => v.lie[a] === r).map(Number));
   document.querySelectorAll(".page:not(.cachee) .tr").forEach(e => { if (e._t[0] === k && groupe.includes(e._t[1])) e.classList.add("trsel"); });
-  bulle.firstElementChild.textContent = (v.mots[r] || "").replace(/^[«\s]+|[\s.,;:!?»]+$/g, "") || (v.notes && v.notes[r]) || "—"; bulle.classList.add("vu");
+  const texteG = groupe.slice().sort((a, b) => a - b).map(i => (v.mots[i] || "").replace(/~/g, "").trim()).filter(Boolean).join(" ");
+  bulle.firstElementChild.textContent = texteG.replace(/^[«\s]+|[\s.,;:!?»]+$/g, "") || (v.notes && v.notes[r]) || "—"; bulle.classList.add("vu");
   const rw = w.getBoundingClientRect(), rb = bulle.getBoundingClientRect(), h = document.body.classList.contains("nu") ? 0 : document.querySelector("header").offsetHeight;
   let y = rw.top - rb.height - 6; if (y < h + 2) y = rw.bottom + 6;
   bulle.style.left = Math.max(4, Math.min(innerWidth - rb.width - 4, rw.left + rw.width / 2 - rb.width / 2)) + "px"; bulle.style.top = y + "px";
@@ -620,7 +628,7 @@ function ouvrirBulle(w) { const k = w._t[0], v = TRAD.v[k]; let r = w._t[1]; mot
 function ouvrirBandeau(k, r) { const v = TRAD.v[k], B = document.getElementById("bandeauT"); bandeauK = k;
   B.querySelector(".ref").textContent = v.ref; const mam = B.querySelector(".mam"); mam.textContent = "";
   if (r >= 0 && motT) { const heb = [...document.querySelectorAll(".trsel")].map(e => e.textContent).join(" ");
-    mam.append(elt("span", "heb", heb), document.createTextNode("  "), elt("span", "ici", (v.mots[r] || "").replace(/^[«\s]+|[\s.,;:!?»]+$/g, ""))); }
+    mam.append(elt("span", "heb", heb), document.createTextNode("  "), elt("span", "ici", bulle.firstElementChild.textContent)); }
   B.querySelector(".cour").textContent = v.courant; const i = CLES_T.indexOf(k);
   document.getElementById("btPrec").disabled = i <= 0; document.getElementById("btSuiv").disabled = i >= CLES_T.length - 1;
   document.body.classList.add("bt"); }
@@ -656,7 +664,10 @@ document.getElementById("sonChanger").addEventListener("click", () => { document
 { let tAppui = null, long = false;   // appui long sur ▶ : rouvre le choix du lecteur
   sonBt.addEventListener("pointerdown", () => { long = false; tAppui = setTimeout(() => { long = true; sonReduire(false); }, 550); });
   ["pointerup", "pointerleave", "pointercancel"].forEach(ev => sonBt.addEventListener(ev, () => clearTimeout(tAppui)));
-  sonBt.addEventListener("click", (e) => { if (long) { e.stopImmediatePropagation(); long = false; } }, true); }
+  sonBt.addEventListener("click", (e) => { if (long) { e.stopImmediatePropagation(); long = false; } }, true);
+  sonBt.addEventListener("contextmenu", (e) => { e.preventDefault(); clearTimeout(tAppui); long = true; sonReduire(false); }); }
+// 18/11 (remarque de l'auteur, 7 h 19 : l'appui long ne rouvrait pas le menu sur Android) : petit bouton ▾ à côté de ▶
+document.getElementById("sonOuvrir").addEventListener("click", () => { sonReduire(false); sonSel.focus(); });
 // ▶ : reprend, ou part du premier mot lu par ce lecteur dans la colonne affichée (sinon du début de sa première montée)
 sonBt.addEventListener("click", () => { if (!sonA.paused) { sonA.pause(); return; }
   if (sonK && sonA.currentTime > 0 && sonMots.some(m => m[0] === col)) { sonA.play(); return; }
