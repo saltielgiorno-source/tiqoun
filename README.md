@@ -11,4 +11,4 @@ Tiqoun qor'im personnel : texte ponctué et cantillé, et lettres seules, à la 
 - **Lectures des fêtes et montées** : tables calculées avec @hebcal/leyning (BSD-2) et @hebcal/core (GPL-2.0-or-later), provisoires.
 - **Code de la page** : © l'auteur du projet.
 
-Les sources des polices sont celles des dépôts cités. Les textes complets des licences sont dans le dossier `licences/` : GPL-2.0, exception pour les polices, OFL-1.1, CC BY-SA 4.0, CC BY 4.0, MIT (tikkun.io), BSD-2 (hebcal-leyning).
+Les sources des polices sont celles des dépôts cités. Les textes complets des licences sont à côté de ce fichier (`LICENCE_*.txt`) : GPL-2.0, exception pour les polices, OFL-1.1, CC BY-SA 4.0, CC BY 4.0, MIT (tikkun.io), BSD-2 (hebcal-leyning).
