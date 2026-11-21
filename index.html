@@ -645,7 +645,7 @@ function ouvrirBulle(w) { const k = w._t[0], v = TRAD.v[k]; let r = w._t[1]; mot
   document.querySelectorAll(".page:not(.cachee) .tr").forEach(e => { if (e._t[0] === k && groupe.includes(e._t[1])) e.classList.add("trsel"); });
   const texteG = groupe.slice().sort((a, b) => a - b).map(i => (v.mots[i] || "").replace(/~/g, "").trim()).filter(Boolean).join(" ");
   bulle.firstElementChild.textContent = texteG.replace(/^[«\s]+|[\s.,;:!?»]+$/g, "") || (v.notes && v.notes[r]) || "—";
-  if (TRAD_NON_RELUE) bulle.firstElementChild.append(elt("small", "nonrelu", " · " + T("trad_non_relue")));   // 21/11 : décision de l'auteur
+  // 21/11, 22 h 39 : mention « non relue » retirée (« Publier sans aucune mention », décision de l'auteur)
   bulle.classList.add("vu");
   const rw = w.getBoundingClientRect(), rb = bulle.getBoundingClientRect(), h = document.body.classList.contains("nu") ? 0 : document.querySelector("header").offsetHeight;
   let y = rw.top - rb.height - 6; if (y < h + 2) y = rw.bottom + 6;
