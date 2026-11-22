@@ -1,5 +1,5 @@
 // garde l'appli sur le téléphone pour qu'elle s'ouvre sans connexion ; VERSION change à chaque construction
-const VERSION = "tiqoun-allegee-4a2d061b04";
+const VERSION = "tiqoun-allegee-f8f795ea2c";
 const FICHIERS = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "apple-touch-icon.png"];
 self.addEventListener("install", (e) => { e.waitUntil(caches.open(VERSION).then((c) => c.addAll(FICHIERS)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", (e) => { e.waitUntil(caches.keys().then((k) => Promise.all(k.filter((n) => n !== VERSION).map((n) => caches.delete(n)))).then(() => self.clients.claim())); });
