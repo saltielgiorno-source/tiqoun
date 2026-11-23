@@ -1,5 +1,5 @@
 // garde l'appli sur le téléphone pour qu'elle s'ouvre sans connexion ; VERSION change à chaque construction
-const VERSION = "tiqoun-9e9884b287";
+const VERSION = "tiqoun-1c0d4804ac";
 const FICHIERS = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "icon-512-maskable.png", "apple-touch-icon.png", "favicon-32.png", "favicon-48.png"];
 self.addEventListener("install", (e) => { e.waitUntil(caches.open(VERSION).then((c) => c.addAll(FICHIERS)).then(() => self.skipWaiting())); });
 self.addEventListener("activate", (e) => { e.waitUntil(caches.keys().then((k) => Promise.all(k.filter((n) => n !== VERSION).map((n) => caches.delete(n)))).then(() => self.clients.claim())); });
