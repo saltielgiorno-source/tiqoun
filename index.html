@@ -542,7 +542,11 @@ function aClone(couche, src, sy, fr) {   // copie d'une lettre (et de ses signes
   ["fontFamily", "fontSize", "fontWeight", "fontStyle", "fontFeatureSettings", "letterSpacing"].forEach(k => d.style[k] = cs[k]); d.style.direction = "rtl"; couche.appendChild(d);
   d.style.left = "0px"; d.style.top = "0px"; const rg = document.createRange(); rg.selectNodeContents(d); const q = rg.getBoundingClientRect();
   d.style.left = (r.left - q.left + (r.width - q.width) / 2) + "px"; d.style.top = (r.top - q.top + (r.height - q.height) / 2) + "px";
-  if (sy !== 1) d.style.transform = `scaleY(${sy})`; return d; }
+  if (sy !== 1) {   // agrandir depuis la ligne de base : la lettre monte, les signes du dessous ne remontent pas vers les voisins
+    const b = el("span"); b.style.cssText = "display:inline-block;width:0;height:0;vertical-align:baseline"; d.appendChild(b);
+    const yb = b.getBoundingClientRect().top - d.getBoundingClientRect().top; b.remove();
+    d.style.transformOrigin = `50% ${yb}px`; d.style.transform = `scaleY(${sy})`; }
+  return d; }
 function poserAides() { const [PF, PD, LF, LD] = aCouches(); fermerBulleA(); aMontrer();
   if (!aReg.g) return; const fr = feuille.getBoundingClientRect();
   [[pageP, "P", PF, PD], [pageL, "L", LF, LD]].forEach(([pg, v, cF, cD]) => {
