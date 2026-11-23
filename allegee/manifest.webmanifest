@@ -1,14 +1,14 @@
 {
- "name": "Tiqoun (sans son)",
- "short_name": "Tiqoun",
+ "name": "Shalshelet (sans son)",
+ "short_name": "Shalshelet",
  "lang": "fr",
  "dir": "ltr",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",
  "orientation": "any",
- "background_color": "#fffdf6",
- "theme_color": "#12264a",
+ "background_color": "#fbf8f1",
+ "theme_color": "#1c1a1d",
  "icons": [
   {
    "src": "icon-192.png",
@@ -19,7 +19,13 @@
    "src": "icon-512.png",
    "sizes": "512x512",
    "type": "image/png",
-   "purpose": "any maskable"
+   "purpose": "any"
+  },
+  {
+   "src": "icon-512-maskable.png",
+   "sizes": "512x512",
+   "type": "image/png",
+   "purpose": "maskable"
   }
  ]
 }
