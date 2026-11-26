@@ -1,8 +1,9 @@
 // garde l'appli sur le téléphone pour qu'elle s'ouvre sans connexion ; VERSION change à chaque construction
-const VERSION = "tiqoun-f2d5d20475-r2511-n2611";
-const FICHIERS = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "icon-512-maskable.png", "apple-touch-icon.png", "favicon-32.png", "favicon-48.png"];
+const VERSION = "tiqoun-f2d5d20475-r2511-o2611";
+const FAMILLE = /^tiqoun-(?!allegee-)/;   // ne vide que les mémoires de sa propre version (26/11 : la complète et la Lite partagent le même site)
+const FICHIERS = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "icon-512-maskable.png", "icon-192-maskable.png", "apple-touch-icon.png", "favicon-32.png", "favicon-48.png"];
 self.addEventListener("install", (e) => { e.waitUntil(caches.open(VERSION).then((c) => c.addAll(FICHIERS)).then(() => self.skipWaiting())); });
-self.addEventListener("activate", (e) => { e.waitUntil(caches.keys().then((k) => Promise.all(k.filter((n) => n !== VERSION).map((n) => caches.delete(n)))).then(() => self.clients.claim())); });
+self.addEventListener("activate", (e) => { e.waitUntil(caches.keys().then((k) => Promise.all(k.filter((n) => n !== VERSION && FAMILLE.test(n)).map((n) => caches.delete(n)))).then(() => self.clients.claim())); });
 // réseau d'abord pour la page (mises à jour), mémoire si pas de réseau
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
