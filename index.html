@@ -276,6 +276,8 @@ body.policeB .aIns { --halo: 0.9px; }
 #bulleA { position: fixed; z-index: 6; display: none; width: min(320px, 88vw); max-height: 60vh; overflow: auto; background: var(--panneau); color: var(--encre);
   border: 1px solid var(--trait); border-radius: 10px; box-shadow: 0 3px 14px rgba(0,0,0,.22); padding: 10px 12px; font: 15px/1.4 var(--police-ui); }
 #bulleA.vu { display: block; }
+#bulleA { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+#bulleA.suite::after { content: ""; position: sticky; display: block; bottom: -10px; height: 30px; margin: -30px -12px -10px; background: linear-gradient(rgba(0,0,0,0), var(--panneau)); pointer-events: none; }
 .ligne.aVue { background: var(--surligne); transition: background .6s; }
 #bulleA .n + .n { margin-top: 9px; padding-top: 8px; border-top: 1px solid var(--trait); }
 #bulleA b { display: block; color: var(--accent); }
@@ -717,7 +719,9 @@ function placerBulleA() { const rep = bulleA._rep; if (!rep) return; bulleA.clas
   bulleA.style.maxHeight = Math.max(120, Math.min(0.6 * innerHeight, bas - hh - 16)) + "px";
   const r = rep.getBoundingClientRect(), b = bulleA.getBoundingClientRect();
   let y = r.bottom + 8; if (y + b.height > bas - 8) { y = r.top - b.height - 8; if (y < hh + 4) y = Math.max(hh + 4, bas - 8 - b.height); }
-  bulleA.style.left = Math.max(6, Math.min(innerWidth - b.width - 6, r.left - b.width + 14)) + "px"; bulleA.style.top = y + "px"; }
+  bulleA.style.left = Math.max(6, Math.min(innerWidth - b.width - 6, r.left - b.width + 14)) + "px"; bulleA.style.top = y + "px";  majSuite(); }
+function majSuite() { bulleA.classList.toggle("suite", bulleA.scrollTop + bulleA.clientHeight < bulleA.scrollHeight - 4); }
+bulleA.addEventListener("scroll", majSuite, { passive: true });
 bulleA.addEventListener("click", e => { e.stopPropagation(); const b = e.target.closest(".aRef"); if (!b) return;
   const n = b.closest(".n"), r = b.dataset.r, v = (AIDES._v || {})[r]; if (!v) return; const o = n.querySelector(`.aVer[data-r="${CSS.escape(r)}"]`);
   if (o) { o.remove(); placerBulleA(); return; }
@@ -725,7 +729,9 @@ bulleA.addEventListener("click", e => { e.stopPropagation(); const b = e.target.
   d.innerHTML = `<bdi class="heb" dir="rtl">${aEsc(v[2])}</bdi><a>${T("aller_verset")}</a>`;
   d.querySelector("a").addEventListener("click", ev => { ev.stopPropagation(); fermerBulleA(); aller(v[0]);
     const Ls = (lettresSeules ? pageL : pageP).querySelectorAll(":scope > .ligne"), x = Ls[v[1]]; if (x) { x.scrollIntoView({ block: "center" }); x.classList.add("aVue"); setTimeout(() => x.classList.remove("aVue"), 1800); } });
-  b.closest(".n").appendChild(d); placerBulleA(); });
+  b.closest(".n").appendChild(d); placerBulleA();
+  const rv = d.getBoundingClientRect(), rb = bulleA.getBoundingClientRect();   // amener le verset déplié dans la vue de la bulle
+  if (rv.bottom > rb.bottom - 4) bulleA.scrollTop += Math.min(rv.bottom - rb.bottom + 12, rv.top - rb.top - 8); majSuite(); });
 document.addEventListener("click", e => { if (!bulleA.contains(e.target)) fermerBulleA(); });
 addEventListener("scroll", fermerBulleA, { passive: true });
 { const ids = { aG: "g", aS: "s", aN: "n", aL: "l" };
