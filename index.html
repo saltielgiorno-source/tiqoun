@@ -1099,7 +1099,7 @@ function sonAller(k, t) { sonCharger(k); const go = () => { sonA.currentTime = t
   if (sonA.readyState >= 1) go(); else sonA.addEventListener("loadedmetadata", go, { once: true }); }
 const sonBarre = document.getElementById("sonBarre");
 function sonReduire(v) { sonBarre.classList.toggle("reduite", v); }
-try { if (sonLec) sonReduire(true); } catch (e) {}
+try { sonReduire(true); } catch (e) {}   // 26/11 : réduite au départ, lecteur choisi ou non
 sonSel.addEventListener("change", () => { sonA.pause(); sonLec = sonSel.value || null; if (!sonLec) return; sonK = null; sonEffacer(); sonReduire(true); try { localStorage.setItem("tiqoun-lecteur", sonLec); } catch (e) {} });
 document.getElementById("sonChanger").addEventListener("click", () => { document.getElementById("reglages").hidden = true; sonReduire(false); sonSel.focus(); });
 { let tAppui = null, long = false;   // appui long sur ▶ : rouvre le choix du lecteur
@@ -1112,7 +1112,7 @@ document.getElementById("sonOuvrir").addEventListener("click", () => { sonReduir
 // ▶ : reprend, ou part du premier mot lu par ce lecteur dans la colonne affichée (sinon du début de sa première montée)
 sonBt.addEventListener("click", () => { if (!sonA.paused) { sonA.pause(); return; }
   if (!rite || !tradU) { ouvrirTradition(); return; }   // 26/11 (auteur) : sans rite choisi, rien ne joue ; le choix « Votre tradition » s'ouvre
-  if (!sonLec) { sonReduire(false); sonSel.focus(); annoncer(T("lecteur_choisir")); return; }
+  if (!sonLec) { if (!sonBarre.classList.contains("reduite")) { sonReduire(true); return; } sonReduire(false); sonSel.focus(); annoncer(T("lecteur_choisir")); return; }
   if (sonK && sonA.currentTime > 0 && sonMots.some(m => m[0] === col)) { sonA.play(); return; }
   // 25/11 (message de « calage et voix ») : la montée affichée est celle du rite ; si son début est dans la colonne, la lecture part de ce début,
   // cherché dans le calage du lecteur (et non du début du fichier, le lecteur pouvant avoir découpé ailleurs) ; la suite s'enchaîne d'un fichier à l'autre.
