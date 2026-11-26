@@ -975,6 +975,7 @@ if (SANS_SON) { document.getElementById("sonBarre").style.display = "none"; cons
 const TRADS = { tunisien: "tunisien", marocain: "marocain", algerien: "algérien", ashkenaze: "ashkénaze", "ashkenaze-habad": "ashkénaze (Ḥabad)", alsacien: "alsacien",
   portugais: "portugais", alepin: "alépin", irakien: "irakien", "judeo-espagnol-turc": "judéo-espagnol (Turquie)",
   italien: "italien", "italien-florentin": "italien (Florence)", yemenite: "yéménite" };
+const LECTEUR_DEFAUT = "tunisien_Yigal-Cohen-Solal";   // 26/11 : lecteur joué tant qu'aucune tradition n'est choisie (provisoire, jusqu'au démarrage guidé)
 const LECTEURS = {};   // lecteur → clés de ses montées, dans l'ordre
 Object.keys(SON).forEach(k => { const m = k.match(/montee-(\d+)_([a-z-]+?)_(.+)$/); const lec = m[2] + "_" + m[3].replace(/-hatan-berechit$/, "");
   (LECTEURS[lec] = LECTEURS[lec] || []).push(k); });
@@ -1022,6 +1023,7 @@ document.getElementById("sonChanger").addEventListener("click", () => { document
 document.getElementById("sonOuvrir").addEventListener("click", () => { sonReduire(false); sonSel.focus(); });
 // ▶ : reprend, ou part du premier mot lu par ce lecteur dans la colonne affichée (sinon du début de sa première montée)
 sonBt.addEventListener("click", () => { if (!sonA.paused) { sonA.pause(); return; }
+  if (!sonLec && !tradU && LECTEURS[LECTEUR_DEFAUT]) sonLec = LECTEUR_DEFAUT;   // défaut provisoire (26/11), en attendant le démarrage guidé
   if (!sonLec) { sonReduire(false); sonSel.focus(); annoncer(T("lecteur_choisir")); return; }
   if (sonK && sonA.currentTime > 0 && sonMots.some(m => m[0] === col)) { sonA.play(); return; }
   // 25/11 (message de « calage et voix ») : la montée affichée est celle du rite ; si son début est dans la colonne, la lecture part de ce début,
