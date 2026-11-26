@@ -3,6 +3,7 @@
  "short_name": "Shalshelet Lite",
  "lang": "fr",
  "dir": "ltr",
+ "id": "/tiqoun/allegee/",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",
@@ -20,6 +21,12 @@
    "sizes": "512x512",
    "type": "image/png",
    "purpose": "any"
+  },
+  {
+   "src": "icon-192-maskable.png",
+   "sizes": "192x192",
+   "type": "image/png",
+   "purpose": "maskable"
   },
   {
    "src": "icon-512-maskable.png",
