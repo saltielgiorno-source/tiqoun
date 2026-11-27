@@ -1109,6 +1109,30 @@ document.getElementById("sonChanger").addEventListener("click", () => { document
   sonBt.addEventListener("contextmenu", (e) => { e.preventDefault(); clearTimeout(tAppui); long = true; sonReduire(false); }); }
 // 18/11 (remarque de l'auteur, 7 h 19 : l'appui long ne rouvrait pas le menu sur Android) : petit bouton ▾ à côté de ▶
 document.getElementById("sonOuvrir").addEventListener("click", () => { sonReduire(false); sonSel.focus(); });
+// 27/11 (auteur, 15 h 11 : « règle ce problème définitivement ») : la barre ouverte se replie toute seule : toucher hors de la barre,
+// ▶ quand un lecteur est choisi, choix fait ou abandonné, défilement, touche Échap, appli mise en arrière-plan, 8 s sans geste ; ▴ la referme aussi
+(() => { let tFerm = null;
+  const ov = document.getElementById("sonOuvrir");
+  const ouverte = () => !sonBarre.classList.contains("reduite");
+  const fermer = () => { clearTimeout(tFerm); if (ouverte()) sonReduire(true); };
+  let liste = false;   // vrai pendant que la liste des lecteurs est déroulée (le temps ne la referme pas)
+  const armer = () => { clearTimeout(tFerm); if (ouverte()) tFerm = setTimeout(() => { if (liste) armer(); else fermer(); }, 8000); };
+  const majOv = () => { ov.textContent = ouverte() ? "▴" : "▾"; };
+  { const st = document.createElement("style"); st.id = "barreRepli";
+    st.textContent = "#sonBarre:not(.reduite) #sonOuvrir { display: inline-block; } main { padding-bottom: 72px; } /* la dernière ligne ne reste jamais sous le bouton */"; document.head.appendChild(st); }
+  new MutationObserver(() => { majOv(); armer(); }).observe(sonBarre, { attributes: true, attributeFilter: ["class"] });
+  ov.addEventListener("click", (e) => { if (ouverte()) { e.stopImmediatePropagation(); fermer(); } }, true);
+  document.addEventListener("pointerdown", (e) => { if (ouverte() && !sonBarre.contains(e.target)) fermer(); }, true);
+  sonBarre.addEventListener("pointerdown", armer); sonSel.addEventListener("input", armer);
+  sonSel.addEventListener("pointerdown", () => { liste = true; });
+  sonSel.addEventListener("change", () => { liste = false; setTimeout(fermer, 0); });
+  sonSel.addEventListener("blur", () => { liste = false; setTimeout(() => { if (document.activeElement !== sonSel) fermer(); }, 300); });
+  sonBt.addEventListener("click", () => { if (ouverte() && sonLec) fermer(); });
+  window.addEventListener("scroll", fermer, { passive: true, capture: true });
+  window.addEventListener("wheel", fermer, { passive: true });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") fermer(); });
+  document.addEventListener("visibilitychange", () => { if (document.hidden) fermer(); });
+  majOv(); armer(); })();
 // ▶ : reprend, ou part du premier mot lu par ce lecteur dans la colonne affichée (sinon du début de sa première montée)
 sonBt.addEventListener("click", () => { if (!sonA.paused) { sonA.pause(); return; }
   if (!rite || !tradU) { ouvrirTradition(); return; }   // 26/11 (auteur) : sans rite choisi, rien ne joue ; le choix « Votre tradition » s'ouvre
